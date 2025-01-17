@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+    <head>
+        <title>Log Visualizer</title>
+    </head>
+    <body>
+        <h2>Log Visualizer</h2>
+        <h4>version 0.0.1</h4>
+
+        <div class="main-container">
+            <label>Select a type:</label>
+            <select size="1" onchange="setType(this.value)">
+                <option value="0">
+                    Fatal
+                </option>
+                <option value="1">
+                    Error
+                </option>
+                <option value="2">
+                    Warning
+                </option>
+                <option value="3">
+                    Trace
+                </option>
+                <option value="4">
+                    Debug
+                </option> 
+                <option value="5">
+                    Info
+                </option>
+            </select>
+            <br><br>
+            <form action="#" onsubmit="return false;">
+                <label for="filepicker">Select a file:</label>
+                <br>
+                <input type="file" name="filepicker" accept=".txt">
+                <br>
+                <br>
+                <button onclick="loadFile(event)">Start processing</button>
+            </form>
+        </div>
+        <div id="result">
+        </div>
+
+    </body>
+    <script>
+        var all = /^\[(.*?)\]:\[(.*?)\]:\[(.*?)\]:(.*?)$/gm;
+        var info = /^\[(.*?)\]:\[(info)\]:\[(.*?)\]:(.*?)$/gm;
+        var debug = /^\[(.*?)\]:\[(debug)\]:\[(.*?)\]:(.*?)$/gm;
+        var trace = /^\[(.*?)\]:\[(trace)\]:\[(.*?)\]:(.*?)$/gm;
+        var warning = /^\[(.*?)\]:\[(warning)\]:\[(.*?)\]:(.*?)$/gm;
+        var error = /^\[(.*?)\]:\[(error)\]:\[(.*?)\]:(.*?)$/gm;
+        var fatal = /^\[(.*?)\]:\[(fatal)\]:\[(.*?)\]:(.*?)$/gm;
+        let regex = fatal;
+
+        async function loadFile(event){
+            var file = event.target.form[0].files[0];
+            if(file!=undefined){
+                var div = document.getElementById("result");
+                div.innerHTML="<h3>"+file.name+"</h3>";
+                var text = await file.text();
+                let logs = [];
+                while((match = regex.exec(text))!==null){
+                    let registry = {};
+                    registry.timestamp = match[1];
+                    registry.type = match[2];
+                    registry.id = match[3];
+                    registry.message = match[4];
+                    logs.push(registry);
+                }
+
+                if(logs.length==0){
+                    div.innerHTML += "<p>No logs found</p>";
+                }else{
+                    for(let i=0; i<logs.length;i++){
+                        let registry = logs[i];
+                        div.innerHTML += "<br>TIMESTAMP: "+registry.timestamp;
+                        div.innerHTML += "<br>TYPE: "+registry.type;
+                        div.innerHTML += "<br>ID: "+registry.id;
+                        div.innerHTML += "<br>MESSAGE: "+registry.message;
+                        div.innerHTML += "<br><br>";
+                    }
+                }
+            }
+        }
+
+        function setType(value){
+            var div = document.getElementById("result");
+            div.innerHTML = "";
+            switch(value){
+                case '0': default:
+                    regex = fatal;
+                    break;
+                case '1':
+                    regex = error;
+                    break;
+                case '2':
+                    regex = warning;
+                    break;
+                case '3':
+                    regex = trace;
+                    break;
+                case '4':
+                    regex = debug;
+                    break;
+                case '5':
+                    regex = info;
+                    break;
+            }
+        }
+    </script>
+</html>
