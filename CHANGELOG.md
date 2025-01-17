@@ -14,7 +14,6 @@ Permite filtrar los registros según su tipo:
  - Debug
  - Trace
  - Info
- 
 
 ### Added
  - Fichero index.html
