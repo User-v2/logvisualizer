@@ -1,14 +1,20 @@
 <!DOCTYPE html>
     <head>
         <title>Log Visualizer</title>
+        <link rel="stylesheet" href="/style/main.css">
     </head>
     <body>
-        <h2>Log Visualizer</h2>
-        <h4>version 0.0.1</h4>
+        <div id="page-title">
+            <h1>Log Visualizer</h1>
+            <code>v0.0.3</code>
+        </div>
 
         <div class="main-container">
             <label>Select a type:</label>
             <select size="1" onchange="setType(this.value)">
+                <option value="">
+                    Todos
+                </option>
                 <option value="0">
                     Fatal
                 </option>
@@ -30,12 +36,13 @@
             </select>
             <br><br>
             <form action="#" onsubmit="return false;">
-                <label for="filepicker">Select a file:</label>
+                <label id="file-select" for="filepicker">Select a file:</label>
                 <br>
-                <input type="file" name="filepicker" accept=".txt">
+                <input type="file" name="filepicker" accept=".txt" onchange="fileSelected(this)">
                 <br>
                 <br>
-                <button onclick="loadFile(event)">Start processing</button>
+                <span id="filename"></span>
+                <button id="processing" onclick="loadFile(event)" disabled>Procesar fichero</button>
             </form>
         </div>
         <div id="result">
@@ -50,13 +57,20 @@
         var warning = /^\[(.*?)\]:\[(warning)\]:\[(.*?)\]:(.*?)$/gm;
         var error = /^\[(.*?)\]:\[(error)\]:\[(.*?)\]:(.*?)$/gm;
         var fatal = /^\[(.*?)\]:\[(fatal)\]:\[(.*?)\]:(.*?)$/gm;
-        let regex = fatal;
+        let regex = all;
+        let logClass = undefined;
+        let fileData = undefined;
+        let maxLogs = 200;
 
         async function loadFile(event){
             var file = event.target.form[0].files[0];
+            await processFile(file);
+        }
+
+        async function processFile(file){
             if(file!=undefined){
+                fileData = file;
                 var div = document.getElementById("result");
-                div.innerHTML="<h3>"+file.name+"</h3>";
                 var text = await file.text();
                 let logs = [];
                 while((match = regex.exec(text))!==null){
@@ -68,44 +82,92 @@
                     logs.push(registry);
                 }
 
+                var resultInfo = "<p>";
                 if(logs.length==0){
-                    div.innerHTML += "<p>No logs found</p>";
+                    resultInfo += "No se han encontrado logs";
+                    if(logClass!=undefined){
+                        resultInfo += " de tipo <code>"+logClass+"</code>";
+                    }
+                    resultInfo += "</p>"
+                    div.innerHTML += resultInfo;
                 }else{
-                    for(let i=0; i<logs.length;i++){
+                    var max = (logs.length<maxLogs)?logs.length:maxLogs;
+                    if(max!=logs.length){
+                        resultInfo += "Hay <code>"+logs.length+"</code> logs";
+                        if(logClass!=undefined){
+                            resultInfo += " de tipo <code>"+logClass+"</code>";
+                        }
+                        resultInfo += ", así que se ha limitado su número a <code>"+max+"</code> para reducir el tiempo de ejecución</p>";
+                        div.innerHTML += resultInfo;
+                    }else{
+                        resultInfo += "Se han encontrado <code>"+logs.length+"</code> logs";
+                        if(logClass!=undefined){
+                            resultInfo += " de tipo <code>"+logClass+"</code>";
+                        }
+                        resultInfo += "</p>";
+                        div.innerHTML += resultInfo;
+                    }
+                    for(let i=0; i<max;i++){
                         let registry = logs[i];
-                        div.innerHTML += "<br>TIMESTAMP: "+registry.timestamp;
-                        div.innerHTML += "<br>TYPE: "+registry.type;
-                        div.innerHTML += "<br>ID: "+registry.id;
-                        div.innerHTML += "<br>MESSAGE: "+registry.message;
-                        div.innerHTML += "<br><br>";
+                        let message = registry.message.replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll("#","&num;").replaceAll("&lt;br&gt;","<br>");
+                        let logHtml = "<div class='log "+registry.type+"'>";
+                        logHtml += "<b>TIMESTAMP</b><code>: "+registry.timestamp+"</code>";
+                        logHtml += "<br><b>TYPE</b><code>: "+registry.type+"</code>";
+                        logHtml += "<br><b>ID</b><code>: "+registry.id+"</code>";
+                        logHtml += "<br><b>MESSAGE</b><code>: "+message+"</code>";
+                        logHtml += "</div>";
+                        div.innerHTML += logHtml;
                     }
                 }
             }
         }
 
-        function setType(value){
+        async function setType(value){
             var div = document.getElementById("result");
             div.innerHTML = "";
             switch(value){
-                case '0': default:
+                default:
+                    regex = all;
+                    logClass = undefined;
+                    break;
+                case '0':
                     regex = fatal;
+                    logClass = "fatal";
                     break;
                 case '1':
                     regex = error;
+                    logClass = "error";
                     break;
                 case '2':
                     regex = warning;
+                    logClass = "warning";
                     break;
                 case '3':
                     regex = trace;
+                    logClass = "trace";
                     break;
                 case '4':
                     regex = debug;
+                    logClass = "debug";
                     break;
                 case '5':
                     regex = info;
+                    logClass = "info";
                     break;
             }
+            if(fileData!=undefined){
+                await processFile(fileData);
+            }
+        }
+
+        function fileSelected(file){
+            var value = file.value.replaceAll("\\","\\\\");
+            var filename = value.substring(value.lastIndexOf("\\")+1,value.lastIndexOf(".txt"));
+            console.log(filename);
+            document.getElementById("filename").innerHTML = "<h3>Fichero elegido: <b>"+filename+"</b></h3>";
+            document.getElementById("processing").disabled = false;
+            document.getElementById("result").innerHTML = "";
+            fileIsSelected = true;
         }
     </script>
 </html>

@@ -1,0 +1,105 @@
+:root{
+    --main-background: rgb(0,150,200);
+    --main-text-color: rgb(200,255,255);
+    --field-background: rgb(0,200,255);
+    --dark-background: rgb(0,50,150);
+    --shadow: 2.5px 5px 5px -2.5px rgba(45, 18, 12, 0.5);
+    --log-error: rgb(100,0,0);
+    --log-error-text: rgb(255,100,100);
+    --log-trace: rgb(50,50,50);
+    --log-trace-text: rgb(200,200,200);
+    --log-fatal: rgb(100,0,100);
+    --log-fatal-text: rgb(255,100,255);
+    --log-warning: rgb(100,100,0);
+    --log-warning-text: rgb(255,255,100);
+    --log-debug: rgb(0,100,0);
+    --log-debug-text: rgb(100,255,100);
+    --log-info: rgb(0,0,100);
+    --log-info-text: rgb(200,200,255);
+}
+*{
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+}
+html{
+    background-color: var(--main-background);
+}
+#page-title{
+    border: 10px double var(--main-background);
+    color: var(--main-text-color);
+    margin: 2.5vh 5vw;
+    padding: 2.5vw;
+    border-radius: 5px 60px;
+    background-color: var(--dark-background);
+}
+.main-container{
+    margin: 5vw;
+}
+.main-container select{
+    background-color: var(--dark-background);
+    padding: .25vw;
+    color: var(--main-text-color);
+    border-radius: 50px;
+    box-shadow: var(--shadow);
+}
+input::file-selector-button{
+    background-color: var(--dark-background);
+    padding: .5vw;
+    margin: 1vw 1vw;
+    color: var(--main-text-color);
+    border-radius: 50px;
+    box-shadow: var(--shadow);
+}
+input[type=file]{
+    width: 100%;
+}
+h3{
+    text-align: center;
+    color: var(--main-text-color);
+    font-weight: normal;
+}
+#processing{
+    background-color: var(--dark-background);
+    padding: 1vw;
+    margin: 1vw 1vw;
+    color: var(--main-text-color);
+    border-radius: 50px;
+    box-shadow: var(--shadow);
+}
+#processing:disabled{
+    box-shadow: none;
+    background-color: lightgray;
+    color: darkgray;
+}
+#result p{
+    text-align: center;
+    margin-bottom: 5vw;
+}
+code{
+    font-family: 'Courier New', Courier, monospace;
+}
+.log{
+    border: 5px double black;
+    border-radius: 20px;
+    padding: 2.5vw;
+    margin: 1.5vw;
+}
+.error{
+    background-color: var(--log-error);
+    color: var(--log-error-text);
+}
+.trace{
+    background-color: var(--log-trace);
+    color: var(--log-trace-text);
+}
+.debug{
+    background-color: var(--log-debug);
+    color: var(--log-debug-text);
+}
+.info{
+    background-color: var(--log-info);
+    color: var(--log-info-text);
+}
+.warning{
+    background-color: var(--log-warning);
+    color: var(--log-warning-text);
+}

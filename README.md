@@ -24,5 +24,6 @@ El *identificador* puede tomar el valor `null`.
 
 ## CHANGELOG
 
+ - [v0.0.3](CHANGELOG.md#003-2025-01-18)
  - [v0.0.2](CHANGELOG.md#002-2025-01-17)
  - [v0.0.1](CHANGELOG.md#001-2024-11-24)
