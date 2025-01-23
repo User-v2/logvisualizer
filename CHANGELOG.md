@@ -1,5 +1,9 @@
 # Log Visualizer CHANGELOG
 
+## 0.0.4 2025-01-23
+### Fixed
+ - Contenidos duplicados al pulsar varias veces el botón sobre un mismo fichero
+
 ## 0.0.3 2025-01-18
 
 ### Added
