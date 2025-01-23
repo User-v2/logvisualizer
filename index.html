@@ -2,11 +2,12 @@
     <head>
         <title>Log Visualizer</title>
         <link rel="stylesheet" href="/style/main.css">
+        <link rel="icon" type="image/x-icon" href="/res/icon.png">
     </head>
     <body>
         <div id="page-title">
             <h1>Log Visualizer</h1>
-            <code>v0.0.3</code>
+            <code>v0.0.4</code>
         </div>
 
         <div class="main-container">
@@ -63,6 +64,7 @@
         let maxLogs = 200;
 
         async function loadFile(event){
+            document.getElementById("result").innerHTML = "";
             var file = event.target.form[0].files[0];
             await processFile(file);
         }
