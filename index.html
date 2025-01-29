@@ -7,7 +7,7 @@
     <body>
         <div id="page-title">
             <h1>Log Visualizer</h1>
-            <code>v0.0.5</code>
+            <code>v0.0.6</code>
         </div>
 
         <div class="main-container">
@@ -79,10 +79,10 @@
         async function loadFile(event){
             document.getElementById("result").innerHTML = "";
             var file = event.target.form[0].files[0];
-            await processFile(file);
+            await processFile(file,true);
         }
 
-        async function processFile(file){
+        async function processFile(file,delay=false){
             document.getElementById("loader").innerHTML = "<span class='spinner'></span><br><span id='loading_info_1'></span><span id='loading_info_2'></span>"
             document.getElementById("loader").style.display = "flex";
             if(file!=undefined){
@@ -101,7 +101,9 @@
                         continue;
                     }
                     logs.push(registry);
-                    await new Promise(r=>setTimeout(r,10))
+                    if(delay){
+                        await new Promise(r=>setTimeout(r,10))
+                    }
                 }
                 var resultInfo = "<p>";
                 if(logs.length==0){
@@ -136,7 +138,9 @@
                         logHtml += "<br><b>MESSAGE</b><code>: "+message+"</code>";
                         logHtml += "</div>";
                         resultHTML += logHtml;
-                        await new Promise(r=>setTimeout(r,25))
+                        if(delay){
+                            await new Promise(r=>setTimeout(r,25))
+                        }
                     }
                     div.innerHTML += resultHTML;
                 }

@@ -1,5 +1,9 @@
 # Log Visualizer CHANGELOG
 
+## 0.0.6 2025-01-29
+### Changed
+ - El tiempo de espera de 35ms/*log* se aplica sólo cuando se pulsa el botón de procesar
+
 ## 0.0.5 2025-01-29
 ### Added
  - Spinner de carga que se muestra mientras se procesan los *logs*
