@@ -1,5 +1,22 @@
 # Log Visualizer CHANGELOG
 
+## 0.0.5 2025-01-29
+### Added
+ - Spinner de carga que se muestra mientras se procesan los *logs*
+ - Añadida duración extra de 35ms por *log* durante el procesado(para hacerse el interesante)
+ - Posibilidad de filtrar los *logs* según su identificador
+    - Acepta ficheros *.lgvz* &rarr; Formato:
+    ```
+    &LVGZ=
+    id_1
+    id_2
+    id_3
+    ...
+    ```
+
+### Changed
+ - Eliminado el límite de *logs* a mostrar
+
 ## 0.0.4 2025-01-23
 ### Fixed
  - Contenidos duplicados al pulsar varias veces el botón sobre un mismo fichero

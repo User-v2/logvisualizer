@@ -7,11 +7,11 @@
     <body>
         <div id="page-title">
             <h1>Log Visualizer</h1>
-            <code>v0.0.4</code>
+            <code>v0.0.5</code>
         </div>
 
         <div class="main-container">
-            <label>Select a type:</label>
+            <label>Selecciona un tipo:</label>
             <select size="1" onchange="setType(this.value)">
                 <option value="">
                     Todos
@@ -37,17 +37,29 @@
             </select>
             <br><br>
             <form action="#" onsubmit="return false;">
-                <label id="file-select" for="filepicker">Select a file:</label>
+                <label id="file-select" for="filepicker">Selecciona un fichero de identificadores:</label>
+                <br>
+                <input type="file" name="filepicker" accept=".lgvz" onchange="idFileSelected(this)">
+            </form>
+            <br>
+            <label>Selecciona un identificador:</label>
+            <select id="log_selector" size="1" onchange="setId(this.value)">
+                <option value="">Todos</option>
+            </select>
+            <br><br>
+            <form action="#" onsubmit="return false;">
+                <label id="file-select" for="filepicker">Selecciona un fichero de <em>logs</em>:</label>
                 <br>
                 <input type="file" name="filepicker" accept=".txt" onchange="fileSelected(this)">
                 <br>
                 <br>
-                <span id="filename"></span>
-                <button id="processing" onclick="loadFile(event)" disabled>Procesar fichero</button>
+                <button class="processing" id="log_file" onclick="loadFile(event)" disabled>Procesar fichero</button>
             </form>
         </div>
+        <span id="filename"></span>
         <div id="result">
         </div>
+        <div id="loader"></div>
 
     </body>
     <script>
@@ -61,7 +73,8 @@
         let regex = all;
         let logClass = undefined;
         let fileData = undefined;
-        let maxLogs = 200;
+        let maxLogs = 1000;
+        let logId = undefined;
 
         async function loadFile(event){
             document.getElementById("result").innerHTML = "";
@@ -70,46 +83,50 @@
         }
 
         async function processFile(file){
+            document.getElementById("loader").innerHTML = "<span class='spinner'></span><br><span id='loading_info_1'></span><span id='loading_info_2'></span>"
+            document.getElementById("loader").style.display = "flex";
             if(file!=undefined){
                 fileData = file;
                 var div = document.getElementById("result");
                 var text = await file.text();
                 let logs = [];
                 while((match = regex.exec(text))!==null){
+                    document.getElementById("loading_info_1").innerHTML = "Cargando "+(logs.length+1);
                     let registry = {};
                     registry.timestamp = match[1];
                     registry.type = match[2];
                     registry.id = match[3];
                     registry.message = match[4];
+                    if(logId!=undefined && match[3]!==logId){
+                        continue;
+                    }
                     logs.push(registry);
+                    await new Promise(r=>setTimeout(r,10))
                 }
-
                 var resultInfo = "<p>";
                 if(logs.length==0){
                     resultInfo += "No se han encontrado logs";
                     if(logClass!=undefined){
                         resultInfo += " de tipo <code>"+logClass+"</code>";
                     }
+                    if(logId!=undefined){
+                        resultInfo += " con identificador <code>"+logId+"</code>";
+                    }
                     resultInfo += "</p>"
                     div.innerHTML += resultInfo;
                 }else{
-                    var max = (logs.length<maxLogs)?logs.length:maxLogs;
-                    if(max!=logs.length){
-                        resultInfo += "Hay <code>"+logs.length+"</code> logs";
-                        if(logClass!=undefined){
-                            resultInfo += " de tipo <code>"+logClass+"</code>";
-                        }
-                        resultInfo += ", así que se ha limitado su número a <code>"+max+"</code> para reducir el tiempo de ejecución</p>";
-                        div.innerHTML += resultInfo;
-                    }else{
-                        resultInfo += "Se han encontrado <code>"+logs.length+"</code> logs";
-                        if(logClass!=undefined){
-                            resultInfo += " de tipo <code>"+logClass+"</code>";
-                        }
-                        resultInfo += "</p>";
-                        div.innerHTML += resultInfo;
+                    resultInfo += "Se han encontrado <code>"+logs.length+"</code> logs";
+                    if(logClass!=undefined){
+                        resultInfo += " de tipo <code>"+logClass+"</code>";
                     }
-                    for(let i=0; i<max;i++){
+                    if(logId!=undefined){
+                        resultInfo += " con identificador <code>"+logId+"</code>";
+                    }
+                    resultInfo += "</p>";
+                    div.innerHTML += resultInfo;
+                    var resultHTML = "";
+                    for(let i=0; i<logs.length;i++){
+                        document.getElementById("loading_info_2").innerHTML = "Procesando "+(i+1)+"/"+logs.length;
                         let registry = logs[i];
                         let message = registry.message.replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll("#","&num;").replaceAll("&lt;br&gt;","<br>");
                         let logHtml = "<div class='log "+registry.type+"'>";
@@ -118,10 +135,16 @@
                         logHtml += "<br><b>ID</b><code>: "+registry.id+"</code>";
                         logHtml += "<br><b>MESSAGE</b><code>: "+message+"</code>";
                         logHtml += "</div>";
-                        div.innerHTML += logHtml;
+                        resultHTML += logHtml;
+                        await new Promise(r=>setTimeout(r,25))
                     }
+                    div.innerHTML += resultHTML;
                 }
             }
+
+            
+            document.getElementById("loader").innerHTML = "";
+            document.getElementById("loader").style.display = "none";
         }
 
         async function setType(value){
@@ -167,9 +190,40 @@
             var filename = value.substring(value.lastIndexOf("\\")+1,value.lastIndexOf(".txt"));
             console.log(filename);
             document.getElementById("filename").innerHTML = "<h3>Fichero elegido: <b>"+filename+"</b></h3>";
-            document.getElementById("processing").disabled = false;
+            document.getElementById("log_file").disabled = false;
             document.getElementById("result").innerHTML = "";
             fileIsSelected = true;
+        }
+
+        async function idFileSelected(file){
+            var data = file.files[0];
+            var selector = document.getElementById("log_selector");
+            selector.innerHTML = "<option value=''>Todos</option><option value='null'><code>null</code></option>";
+            if(data==undefined){
+                logId = undefined;
+                return;
+            }
+            var text = await data.text();
+            var idList = text.split("\n");
+            if(idList[0].trim()!=="&LGVZ="){
+                alert("Fichero de identificadores no válido");
+                return;
+            }
+            for(let i=1;i<=idList.length;i++){
+                selector.innerHTML += "<option value='"+idList[i]+"'>"+idList[i]+"</option>";
+            }
+        }
+
+        async function setId(value){
+            document.getElementById("result").innerHTML = "";
+            if(value.length==0){
+                logId = undefined;
+            }else{
+                logId = value.trim();
+            }
+            if(fileData!=undefined){
+                await processFile(fileData);
+            }
         }
     </script>
 </html>
